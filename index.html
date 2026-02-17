@@ -2,47 +2,25 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fly Game Alive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org"></script>
     <style>
-        body { 
-            margin: 0; padding: 0; background: #27ae60; 
-            overflow: hidden; height: 100vh; width: 100vw; 
-        }
-        #ui { 
-            position: absolute; top: 15px; width: 100%; text-align: center; 
-            color: white; font-size: 28px; z-index: 100; pointer-events: none; 
-            font-family: sans-serif; font-weight: bold;
-        }
-        #game-area { 
-            width: 100vw; height: 100vh; 
-            position: relative; /* ЭТО КЛЮЧЕВОЕ! Чтобы муха летала внутри */
-        }
-        #the-fly {
-            position: absolute; /* Теперь это сработает правильно */
-            width: 90px;
-            height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        body { margin: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; }
+        #score-text { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-size: 30px; font-family: sans-serif; z-index: 10; }
+        /* Муха */
+        #fly {
+            position: absolute;
+            width: 100px; height: 100px;
             font-size: 60px;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            z-index: 50;
-            touch-action: none;
-            user-select: none;
-            /* Начальная позиция, чтобы не залипала в нуле */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 100px; left: 100px; /* Стартовая позиция */
         }
     </style>
 </head>
 <body>
-    <div id="ui">Счет: <span id="score">0</span></div>
-    <div id="game-area">
-        <div id="the-fly">🪰</div>
-    </div>
+    <div id="score-text">Мух: <span id="val">0</span></div>
+    <div id="fly">🪰</div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -50,40 +28,39 @@
         tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
 
         let score = 0;
-        const scoreDisplay = document.getElementById('score');
-        const fly = document.getElementById('the-fly');
+        const fly = document.getElementById('fly');
+        const val = document.getElementById('val');
 
-        function moveFly() {
-            // Учитываем размер мухи (90px) и отступы
-            const width = window.innerWidth;
-            const height = window.innerHeight;
+        function move() {
+            // Самый примитивный способ движения
+            const x = Math.floor(Math.random() * (window.innerWidth - 100));
+            const y = Math.floor(Math.random() * (window.innerHeight - 150)) + 50;
             
-            const randomX = Math.floor(Math.random() * (width - 100)) + 10;
-            const randomY = Math.floor(Math.random() * (height - 200)) + 100;
-
-            // Принудительно задаем пиксели и сбрасываем центрирование
-            fly.style.transform = 'none'; 
-            fly.style.left = randomX + "px";
-            fly.style.top = randomY + "px";
+            fly.style.left = x + 'px';
+            fly.style.top = y + 'px';
         }
 
-        const handleHit = (e) => {
-            if (e) e.preventDefault();
+        // Обработка нажатия
+        fly.onclick = function() {
             score++;
-            scoreDisplay.textContent = score;
-            moveFly();
+            val.textContent = score;
+            move();
+        };
+        
+        // Для сенсорных экранов
+        fly.ontouchstart = function(e) {
+            e.preventDefault();
+            score++;
+            val.textContent = score;
+            move();
         };
 
-        fly.addEventListener('touchstart', handleHit);
-        fly.addEventListener('mousedown', handleHit);
-
-        tg.onEvent('mainButtonClicked', function() {
+        tg.onEvent('mainButtonClicked', () => {
             tg.sendData(score.toString());
-            tg.close();
         });
 
-        // Запуск!
-        window.onload = moveFly;
+        // Двигаем первый раз при загрузке
+        move();
     </script>
 </body>
 </html>
