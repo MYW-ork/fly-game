@@ -6,42 +6,95 @@
     <title>Fly Clicker</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { margin: 0; background: #64C864; overflow: hidden; font-family: sans-serif; text-align: center; }
-        #score { font-size: 30px; color: white; margin-top: 20px; pointer-events: none; }
-        .fly { position: absolute; width: 50px; height: 50px; background: black; border-radius: 50%; cursor: pointer; transition: transform 0.1s; }
+        body { 
+            margin: 0; 
+            padding: 0;
+            background: #64C864; 
+            overflow: hidden; 
+            font-family: 'Arial', sans-serif;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+            z-index: 10;
+        }
+        .fly {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #333; /* Тельце мухи */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        /* Крылышки для красоты */
+        .fly::before, .fly::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 20px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            top: 10px;
+        }
+        .fly::before { left: -15px; transform: rotate(-30deg); }
+        .fly::after { right: -15px; transform: rotate(30deg); }
     </style>
 </head>
 <body>
-    <div id="score">Flies: 0</div>
-    <div id="game-area" style="width: 100vw; height: 100vh;"></div>
+    <div id="ui">Мух прихлопнуто: <span id="score">0</span></div>
+    <div id="game-canvas" style="width: 100vw; height: 100vh;"></div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
+        tg.expand();
+        tg.MainButton.setText("ЗАВЕРШИТЬ ОХОТУ").show();
 
         let score = 0;
-        const area = document.getElementById('game-area');
         const scoreDisplay = document.getElementById('score');
+        const canvas = document.getElementById('game-canvas');
 
-        function createFly() {
+        function spawnFly() {
             const fly = document.createElement('div');
             fly.className = 'fly';
-            fly.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-            fly.style.top = Math.random() * (window.innerHeight - 100) + 50 + 'px';
             
-            fly.onclick = () => {
+            // Случайные координаты (с отступами от краев)
+            const x = Math.random() * (window.innerWidth - 80) + 10;
+            const y = Math.random() * (window.innerHeight - 150) + 80;
+            
+            fly.style.left = x + 'px';
+            fly.style.top = y + 'px';
+            fly.innerHTML = "🪰"; // Настоящий эмодзи мухи!
+
+            fly.onclick = function() {
                 score++;
-                scoreDisplay.innerText = "Flies: " + score;
-                area.removeChild(fly);
-                createFly();
-                // Отправляем данные боту при каждом клике или при закрытии?
-                // Лучше всего отправить финальный результат:
-                tg.sendData(score.toString()); 
+                scoreDisplay.innerText = score;
+                canvas.removeChild(fly);
+                spawnFly(); // Спавним новую
             };
-            area.appendChild(fly);
+
+            canvas.appendChild(fly);
         }
 
-        createFly();
+        // Когда жмем на главную кнопку Телеграма - отправляем счет боту
+        tg.onEvent('mainButtonClicked', function(){
+            tg.sendData(score.toString()); 
+        });
+
+        // Запуск первой мухи
+        spawnFly();
     </script>
 </body>
 </html>
