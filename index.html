@@ -2,85 +2,58 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fly Clicker Fixed</title>
+    <title>Debug Fly</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { 
-            margin: 0; padding: 0; background: #27ae60; 
-            overflow: hidden; font-family: sans-serif; 
-            width: 100vw; height: 100vh;
+        /* Делаем фон серым, чтобы видеть границы */
+        body { margin: 0; background: #555; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #27ae60; /* Зеленое поле */
         }
-        #ui { 
-            position: absolute; top: 20px; width: 100%; 
-            text-align: center; color: white; font-size: 24px; 
-            z-index: 100; pointer-events: none;
-        }
-        .fly { 
-            position: absolute; 
-            width: 80px; height: 80px; 
-            background: #333; /* Тёмное тельце, чтобы точно увидеть! */
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 40px; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            touch-action: none;
-            z-index: 50;
+
+        .fly {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: black;      /* Черный квадрат */
+            border: 5px solid red;  /* С красной рамкой */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: white;
+            z-index: 999;
+            top: 50% !important;   /* Прямо по центру */
+            left: 50% !important;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
 <body>
-    <div id="ui">Счет: <span id="score">0</span></div>
-    <div id="game-canvas" style="width: 100%; height: 100%; position: relative;"></div>
+    <div id="game-canvas">
+        <!-- Муха прямо в коде, без скриптов для проверки -->
+        <div class="fly" id="test-fly">🪰</div>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setText("СОХРАНИТЬ И ВЫЙТИ").show();
 
+        const fly = document.getElementById('test-fly');
         let score = 0;
-        const scoreDisplay = document.getElementById('score');
-        const canvas = document.getElementById('game-canvas');
 
-        function spawnFly() {
-            // Удаляем старую муху, если она была (на всякий случай)
-            canvas.innerHTML = ''; 
-
-            const fly = document.createElement('div');
-            fly.className = 'fly';
-            
-            // Используем textContent — это надёжнее всего
-            fly.textContent = "🪰"; 
-
-            // Случайная позиция
-            const maxX = window.innerWidth - 90;
-            const maxY = window.innerHeight - 150;
-            const x = Math.floor(Math.random() * maxX) + 10;
-            const y = Math.floor(Math.random() * maxY) + 80;
-
-            fly.style.left = x + 'px';
-            fly.style.top = y + 'px';
-
-            // Используем дедовский метод обработки клика и тапа
-            const hit = function(e) {
-                e.preventDefault();
-                score++;
-                scoreDisplay.textContent = score;
-                spawnFly();
-            };
-
-            fly.addEventListener('mousedown', hit);
-            fly.addEventListener('touchstart', hit);
-
-            canvas.appendChild(fly);
-        }
-
-        tg.onEvent('mainButtonClicked', function() {
-            tg.sendData(score.toString());
-        });
-
-        // Запускаем через небольшую паузу, чтобы экран успел прогрузиться
-        setTimeout(spawnFly, 500);
+        fly.onclick = function() {
+            score++;
+            // При клике муха просто прыгнет в случайное место
+            fly.style.top = Math.random() * 80 + '%';
+            fly.style.left = Math.random() * 80 + '%';
+            fly.style.transform = 'none'; 
+            console.log("Очки:", score);
+        };
     </script>
 </body>
 </html>
