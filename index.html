@@ -1,101 +1,66 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org"></script>
     <style>
         body { margin: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; }
-        #container { width: 100%; height: 100%; position: relative; }
-        /* Твой класс для мухи */
-        .fly-unit {
+        #score-text { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-size: 30px; font-family: sans-serif; z-index: 10; }
+        /* Муха */
+        #fly {
             position: absolute;
-            width: 90px; height: 90px;
+            width: 100px; height: 100px;
+            font-size: 60px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 60px; cursor: pointer; z-index: 999;
-            transition: all 0.7s; /* Чтобы плавно летала */
-        }
-        #score-board {
-            position: absolute; top: 10px; width: 100%; text-align: center;
-            color: white; font-size: 30px; font-family: sans-serif; z-index: 100;
+            cursor: pointer;
+            top: 100px; left: 100px; /* Стартовая позиция */
         }
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="score-board">Мух: <span id="val">0</span></div>
-    </div>
+    <div id="score-text">Мух: <span id="val">0</span></div>
+    <div id="fly">🪰</div>
 
     <script>
-        var tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
         tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
 
-        var container = document.getElementById("container");
-        var scoreVal = document.getElementById("val");
-        var score = 0;
+        let score = 0;
+        const fly = document.getElementById('fly');
+        const val = document.getElementById('val');
 
-        // ТВОЯ легендарная функция add_Object (адаптированная под минимализм)
-        function add_Object(object, id, content, posX, posY, current) {
-            var newObj = document.createElement(object);
-            newObj.id = id;
-            newObj.className = "fly-unit";
+        function move() {
+            // Самый примитивный способ движения
+            const x = Math.floor(Math.random() * (window.innerWidth - 100));
+            const y = Math.floor(Math.random() * (window.innerHeight - 150)) + 50;
             
-            // Твой метод добавления контента вручную
-            var txt = document.createTextNode(content);
-            newObj.appendChild(txt);
-            
-            newObj.style.left = posX + "px";
-            newObj.style.top = posY + "px";
-            
-            current.appendChild(newObj);
-            return newObj;
+            fly.style.left = x + 'px';
+            fly.style.top = y + 'px';
         }
 
-        // Логика перемещения
-        function moveFly(obj) {
-            var x = Math.floor(Math.random() * (window.innerWidth - 100));
-            var y = Math.floor(Math.random() * (window.innerHeight - 200)) + 80;
-            obj.style.left = x + "px";
-            obj.style.top = y + "px";
-        }
+        // Обработка нажатия
+        fly.onclick = function() {
+            score++;
+            val.textContent = score;
+            move();
+        };
+        
+        // Для сенсорных экранов
+        fly.ontouchstart = function(e) {
+            e.preventDefault();
+            score++;
+            val.textContent = score;
+            move();
+        };
 
-        // Старт игры
-        function init() {
-            // Создаем муху твоим методом
-            var fly = add_Object('div', 'the_fly', '🪰', 100, 100, container);
-
-            // Обработка клика/тапа
-            var hit = function(e) {
-                if(e) e.preventDefault();
-                score++;
-                scoreVal.innerHTML = score;
-                
-                fly.innerHTML = ""; // Очистка
-                fly.appendChild(document.createTextNode("😵‍💫")); // Оглушение
-                
-                setTimeout(function() {
-                    fly.innerHTML = "";
-                    fly.appendChild(document.createTextNode("🪰"));
-                    moveFly(fly);
-                }, 300);
-            };
-
-            fly.onclick = hit;
-            fly.ontouchstart = hit;
-
-            // Летает сама раз в секунду
-            setInterval(function() {
-                moveFly(fly);
-            }, 1100);
-        }
-
-        tg.onEvent('mainButtonClicked', function() {
+        tg.onEvent('mainButtonClicked', () => {
             tg.sendData(score.toString());
         });
 
-        // Запуск
-        window.onload = init;
+        // Двигаем первый раз при загрузке
+        move();
     </script>
 </body>
 </html>
