@@ -2,34 +2,31 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org"></script>
     <script>
         var tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setText("СОХРАНИТЬ В БОТЕ").show();
+        tg.MainButton.setText("СОХРАНИТЬ ОЧКИ").show();
 
-        // Берем из URL или ставим 0, если совсем пусто
-        var urlParams = new URLSearchParams(window.location.search);
-        var score = parseInt(urlParams.get('score')); 
-        
+        // --- ВОТ ОН, ПАРСИНГ ИЗ СТРАНИЦЫ ---
+        var query = window.location.search.substring(1); // Берем всё после '?'
+        var score = parseInt(query); // Превращаем в число
+
+        // Если в ссылке пусто или не число - ставим 0, чтобы не было NaN
+        if (isNaN(score)) { score = 0; }
+
         var n1 = 0, n2 = 0, n3 = 0;
 
         function play() {
-            if (isNaN(score) || score <= 0) {
-                alert("Нет очков для игры!");
-                return;
-            }
+            if (score <= 0) { alert("Нет очков!"); return; }
             
             n1 = Math.floor(Math.random() * 10);
             n2 = Math.floor(Math.random() * 10);
             n3 = Math.floor(Math.random() * 10);
 
-            // Твоя логика бонусов
             if (n1 == n2 && n1 == n3) {
-                if (n1 == 7) score += 7777;
-                else if (n1 == 0) score -= 1000;
-                else score += 500;
+                score += 500;
+                alert("BINGO!");
             } else {
                 score -= 1;
             }
@@ -37,20 +34,18 @@
         }
 
         function render() {
-            // Если тут NaN - значит в ссылке от бота пришла ерунда!
-            document.getElementById('sc').textContent = "Баланс: " + score;
-            document.getElementById('slots').textContent = n1 + " | " + n2 + " | " + n3;
+            document.getElementById('balance').innerHTML = "Очки: " + score;
+            document.getElementById('slots').innerHTML = n1 + " | " + n2 + " | " + n3;
         }
 
         tg.onEvent('mainButtonClicked', function() {
             tg.sendData(score.toString());
-            tg.close();
         });
     </script>
 </head>
-<body onload="render()" style="text-align:center; background:#2c3e50; color:white; font-family:sans-serif;">
-    <h1 id="sc">Загрузка...</h1>
-    <div id="slots" style="font-size:60px; margin:20px; background:white; color:black;">0 | 0 | 0</div>
-    <button onclick="play()" style="width:80%; height:60px;">КРУТИТЬ!</button>
+<body onload="render()" style="text-align:center; background:#27ae60; color:white; font-family:sans-serif;">
+    <h1 id="balance">Загрузка...</h1>
+    <div id="slots" style="font-size:50px; padding:20px; background:white; color:black; margin:20px;">0 | 0 | 0</div>
+    <button onclick="play()" style="width:80%; height:50px;">КРУТИТЬ</button>
 </body>
 </html>
