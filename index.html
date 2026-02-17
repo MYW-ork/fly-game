@@ -3,64 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fly Clicker</title>
+    <title>Fly Clicker VIP</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0;
-            background: #64C864; 
-            overflow: hidden; 
-            font-family: 'Arial', sans-serif;
-            user-select: none;
-            touch-action: manipulation;
+        body { margin: 0; padding: 0; background: #2c3e50; overflow: hidden; font-family: sans-serif; user-select: none; }
+        #ui { position: absolute; top: 10px; width: 100%; text-align: center; color: #ecf0f1; font-size: 28px; z-index: 5; pointer-events: none; }
+        .fly { 
+            position: absolute; width: 70px; height: 70px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 45px; cursor: pointer; transition: transform 0.1s;
         }
-        #ui {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            pointer-events: none;
-            z-index: 10;
-        }
-        .fly {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background-color: #333; /* Тельце мухи */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        /* Крылышки для красоты */
-        .fly::before, .fly::after {
-            content: '';
-            position: absolute;
-            width: 30px;
-            height: 20px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 50%;
-            top: 10px;
-        }
-        .fly::before { left: -15px; transform: rotate(-30deg); }
-        .fly::after { right: -15px; transform: rotate(30deg); }
     </style>
 </head>
 <body>
-    <div id="ui">Мух прихлопнуто: <span id="score">0</span></div>
+    <div id="ui">Счет: <span id="score">0</span></div>
     <div id="game-canvas" style="width: 100vw; height: 100vh;"></div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setText("ЗАВЕРШИТЬ ОХОТУ").show();
+        tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
 
         let score = 0;
         const scoreDisplay = document.getElementById('score');
@@ -70,31 +32,30 @@
             const fly = document.createElement('div');
             fly.className = 'fly';
             
-            // Случайные координаты (с отступами от краев)
+            // Твой метод: создаем текстовый узел вручную
+            const flyIcon = document.createTextNode("🪰");
+            fly.appendChild(flyIcon);
+
             const x = Math.random() * (window.innerWidth - 80) + 10;
             const y = Math.random() * (window.innerHeight - 150) + 80;
-            
             fly.style.left = x + 'px';
             fly.style.top = y + 'px';
-            //fly.innerHTML = "🪰"; // Настоящий эмодзи мухи!
-            fly.innerHTML = "0";
 
             fly.onclick = function() {
                 score++;
-                scoreDisplay.innerText = score;
+                // Используем textContent для надежности
+                scoreDisplay.textContent = score;
                 canvas.removeChild(fly);
-                spawnFly(); // Спавним новую
+                spawnFly();
             };
-
             canvas.appendChild(fly);
         }
 
-        // Когда жмем на главную кнопку Телеграма - отправляем счет боту
-        tg.onEvent('mainButtonClicked', function(){
-            tg.sendData(score.toString()); 
+        tg.onEvent('mainButtonClicked', function() {
+            tg.sendData(score.toString());
+            tg.close();
         });
 
-        // Запуск первой мухи
         spawnFly();
     </script>
 </body>
