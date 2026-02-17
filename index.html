@@ -2,65 +2,78 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org"></script>
     <style>
-        body { margin: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; }
-        #score-text { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-size: 30px; font-family: sans-serif; z-index: 10; }
-        /* Муха */
-        #fly {
-            position: absolute;
-            width: 100px; height: 100px;
-            font-size: 60px;
+        body { margin: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; font-family: sans-serif; }
+        #Scene { width: 100%; height: 100%; position: relative; }
+        #ui { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-size: 24px; z-index: 10; pointer-events: none; }
+        .fly-obj {
+            position: absolute; width: 80px; height: 80px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            top: 100px; left: 100px; /* Стартовая позиция */
+            font-size: 50px; cursor: pointer;
+            transition: all 0.8s linear; /* Плавный полет! */
+            z-index: 5; touch-action: none;
         }
     </style>
 </head>
 <body>
-    <div id="score-text">Мух: <span id="val">0</span></div>
-    <div id="fly">🪰</div>
+    <div id="ui">Мух: <span id="score">0</span></div>
+    <div id="Scene"></div> <!-- Здесь будет вся магия -->
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
+        tg.MainButton.setText("СОХРАНИТЬ И ВЫЙТИ").show();
 
+        const scene = document.getElementById('Scene');
+        const scoreVal = document.getElementById('score');
         let score = 0;
-        const fly = document.getElementById('fly');
-        const val = document.getElementById('val');
 
-        function move() {
-            // Самый примитивный способ движения
+        // Создаем муху через JS, как ты любишь
+        const fly = document.createElement('div');
+        fly.className = 'fly-obj';
+        fly.textContent = "🪰";
+        scene.appendChild(fly);
+
+        function moveFly() {
             const x = Math.floor(Math.random() * (window.innerWidth - 100));
             const y = Math.floor(Math.random() * (window.innerHeight - 150)) + 50;
-            
             fly.style.left = x + 'px';
             fly.style.top = y + 'px';
         }
 
-        // Обработка нажатия
-        fly.onclick = function() {
+        // Авто-полет каждые 800мс
+        let flightTimer = setInterval(moveFly, 800);
+
+        function handleHit(e) {
+            if (e) e.preventDefault();
+            
+            // 1. Оглушаем муху
+            fly.textContent = "😵‍💫"; 
             score++;
-            val.textContent = score;
-            move();
-        };
-        
-        // Для сенсорных экранов
-        fly.ontouchstart = function(e) {
-            e.preventDefault();
-            score++;
-            val.textContent = score;
-            move();
-        };
+            scoreVal.textContent = score;
+            
+            // Останавливаем полет на секунду
+            clearInterval(flightTimer);
+            
+            // 2. Через 300мс она исчезает и появляется в новом месте
+            setTimeout(() => {
+                fly.textContent = "🪰";
+                moveFly();
+                flightTimer = setInterval(moveFly, 800);
+            }, 300);
+        }
+
+        fly.addEventListener('touchstart', handleHit);
+        fly.addEventListener('mousedown', handleHit);
 
         tg.onEvent('mainButtonClicked', () => {
             tg.sendData(score.toString());
         });
 
-        // Двигаем первый раз при загрузке
-        move();
+        // Первый запуск
+        moveFly();
     </script>
 </body>
 </html>
