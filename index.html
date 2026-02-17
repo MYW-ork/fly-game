@@ -1,76 +1,161 @@
-<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Весёлый Роджер</title>
-<script src="https://telegram.org"></script>
-<style>
-    body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 10px; }
-    table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-    .num-slot { font-size: 60px; font-weight: bold; background: #eee; padding: 20px; border: 2px solid #ccc; }
-    .btn-try { width: 100%; height: 60px; font-size: 20px; background: #34cceb; color: white; border: none; border-radius: 5px; cursor: pointer; }
-</style>
+<title>
+Весёлый роджер
+</title>
+<script language="JavaScript">
+  var score = 777;
+  var num_1 = 0;
+  var num_2 = 0;
+  var num_3 = 0;
+  var bonus_0 = 1000;
+  var bonus_1 = 100;
+  var bonus_2 = 200;
+  var bonus_3 = 333;
+  var bonus_4 = 444;
+  var bonus_5 = 500;
+  var bonus_6 = 666;
+  var bonus_7 = 7777;
+  var bonus_8 = 800;
+  var bonus_9 = 999;
+function random(min, max) {
+  return min + Math.random() * (max - min);
+}
+function clearDoc()
+{
+   document.write(" ");
+}
+function addBonus()
+{
+if((num_1 == num_2) && (num_1 == num_3))
+    {
+      if(num_1 == 0)
+      {
+        alert('!!! Loooser -'+bonus_0+' !!!');
+        score -= bonus_0;
+      }
+      else if(num_1 == 1)
+      {
+        alert('!!! Bingo +'+bonus_1+' !!!');
+        score += bonus_1;
+      }
+      else if(num_1 == 2)
+      {
+        alert('!!! Bingo +'+bonus_2+' !!!');
+        score += bonus_2;
+      }
+      else if(num_1 == 3)
+      {
+        alert('!!! Bingo +'+bonus_3+' !!!');
+        score += bonus_3;
+      }
+      else if(num_1 == 4)
+      {
+        alert('!!! Bingo +'+bonus_4+' !!!');
+        score += bonus_4;
+      }
+      else if(num_1 == 5)
+      {
+        alert('!!! Bingo +'+bonus_5+' !!!');
+        score += bonus_5;
+      }
+      else if(num_1 == 6)
+      {
+        alert('!!!Loooser -'+bonus_6+' !!!');
+        score -= bonus_6;
+      }
+      else if(num_1 == 7)
+      {
+        alert('!!! Bingo +'+bonus_7+' !!!');
+        score += bonus_7;
+      }
+      else if(num_1 == 8)
+      {
+        alert('!!! Bingo +'+bonus_8+' !!!');
+        score += bonus_8;
+      }
+      else if(num_1 == 9)
+      {
+        alert('!!! Loooser -'+bonus_9+' !!!');
+        score -= bonus_9;
+      }
+    }
+    else
+    {
+      score -= 1;    
+    }
+}
+function TryyeT()
+{
+  if(score >= 1)
+  {
+    document.body.innerHTML = '';
+    num_1 = Math.round(random(0, 9));
+    num_2 = Math.round(random(0, 9));
+    num_3 = Math.round(random(0, 9));
+    
+    addBonus();
+    
+    document.write('<head><title>Весёлый роджер</title></head>');
+    document.write('<body><table border="0" width="100%" height="100%"><tr><td width="300">&nbsp;</td><td width="60%" height="35">&nbsp;</td><td width="300">');
+    document.write('<p align="center" valign="center"><b>Score: ' + score + ' </b></p>');
+    document.write('</td></tr><tr><td height="90%" rowspan="3">');
+    
+    document.write('<table border="1" bordercolor="black" width="100%" height="100%">');
+    document.write('<tr><td align="center" valign="center">0 | 0 | 0</td><td align="center" valign="center">-'+ bonus_0 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">1 | 1 | 1</td><td align="center" valign="center">+'+ bonus_1 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">2 | 2 | 2</td><td align="center" valign="center">+'+ bonus_2 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">3 | 3 | 3</td><td align="center" valign="center">+'+ bonus_3 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">4 | 4 | 4</td><td align="center" valign="center">+'+ bonus_4 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">5 | 5 | 5</td><td align="center" valign="center">+'+ bonus_5 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">6 | 6 | 6</td><td align="center" valign="center">-'+ bonus_6 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">7 | 7 | 7</td><td align="center" valign="center">+'+ bonus_7 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">8 | 8 | 8</td><td align="center" valign="center">+'+ bonus_8 +'</td></tr>');
+    document.write('<tr><td align="center" valign="center">9 | 9 | 9</td><td align="center" valign="center">-'+ bonus_9 +'</td></tr>');
+    document.write('</table>');
+    
+    document.write('</td><td><table border="1" width="100%" height="100%"><tr>');
+    document.write('<td><p align="center" valign="center"><font size="52"><b> ' + num_1 + ' </b></font></p></td>');
+    document.write('<td><p align="center" valign="center"><font size="52"><b> ' + num_2 + ' </b></font></p></td>');
+    document.write('<td><p align="center" valign="center"><font size="52"><b> ' + num_3 + ' </b></font></p></td>');
+    document.write('</tr></table></td><td>&nbsp;</td></tr><tr><td height="35" align="center" valign="center">');
+    document.write('<input type="button" id="elem" onclick="TryyeT();" value="Try yet...">');
+    document.write('</td><td>&nbsp;</td></tr><tr><td height="5%">&nbsp;</td><td>&nbsp;</td></tr></table></body>');
+  }
+}
+</script>
 </head>
-<body onload="init()">
-    <div id="game"></div>
-
-    <script>
-    var tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.MainButton.setText("ЗАБРАТЬ ВЫИГРЫШ").show();
-
-    var score = 100; // Стартовые очки (бот потом пришлет актуальные)
-    var nums = [0, 0, 0];
-
-    function random(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
-
-    function draw() {
-        var html = '<p align="center"><b>Твой баланс: ' + score + ' </b></p>';
-        html += '<table border="1" width="100%" height="200"><tr>';
-        for(var i=0; i<3; i++) {
-            html += '<td align="center" class="num-slot">' + nums[i] + '</td>';
-        }
-        html += '</tr></table><br>';
-        html += '<input type="button" class="btn-try" onclick="play();" value="КРУТИТЬ (1 очко)">';
-        
-        // Таблица выигрышей (мини-версия)
-        html += '<br><br><small>777: +7777 | 000: -1000 | 666: -666</small>';
-        
-        document.getElementById('game').innerHTML = html;
-    }
-
-    function play() {
-        if(score < 1) { alert("Очки кончились!"); return; }
-        
-        nums[0] = random(0, 9);
-        nums[1] = random(0, 9);
-        nums[2] = random(0, 9);
-
-        if (nums[0] == nums[1] && nums[0] == nums[2]) {
-            var n = nums[0];
-            if (n == 7) score += 7777;
-            else if (n == 0) score -= 1000;
-            else if (n == 6) score -= 666;
-            else if (n == 9) score -= 999;
-            else score += (n * 100);
-            alert("БОНУС!");
-        } else {
-            score -= 1;
-        }
-        draw();
-    }
-
-    function init() {
-        // Если бот передал баланс через URL (например ?score=500)
-        var urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has('score')) score = parseInt(urlParams.get('score'));
-        draw();
-    }
-
-    tg.onEvent('mainButtonClicked', function() {
-        tg.sendData(score.toString()); // Отправляем итоговый счет боту
-    });
-    </script>
+<body>
+<table border="0" width="100%" height="100%">
+<tr>
+<td width="300">&nbsp;</td><td width="60%" height="35">&nbsp;</td>
+<td width="300">
+<script>
+   document.write("<p align='center' valign='center'><b>Score: "+score+" </b></p>");
+</script>
+</td>
+</tr>
+<tr>
+<td height="90%" rowspan="3">&nbsp;</td>
+<td>
+<table border="1" width="100%" height="100%">
+<tr>
+<td><p align="center" valign="center"><font size="52"><b><script>document.write(num_1);</script></font></b></p></td>
+<td><p align="center" valign="center"><font size="52"><b><script>document.write(num_2);</script></font></b></p></td>
+<td><p align="center" valign="center"><font size="52"><b><script>document.write(num_3);</script></font></b></p></td>
+</tr>
+</table>
+</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td height="35" align="center" valign="center">
+   <input type="button" id="elem" onclick="TryyeT();" value="Try yet...">
+</td><td>&nbsp;</td>
+</tr>
+<tr>
+<td height="5%">&nbsp;</td><td>&nbsp;</td>
+</tr>
+</table><!--//-->
 </body>
-</html>
+    </html>
