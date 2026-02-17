@@ -2,39 +2,43 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Весёлый роджер</title>
-<!-- Подключаем скрипт Телеграма -->
 <script src="https://telegram.org"></script>
 <script language="JavaScript">
+  // Инициализация Telegram WebApp
   var tg = window.Telegram.WebApp;
   tg.expand();
-  // Показываем кнопку сохранения рекорда внизу экрана
   tg.MainButton.setText("СОХРАНИТЬ ОЧКИ В БОТЕ").show();
 
-  var score = 777;
-  // Попробуем вытащить баланс из ссылки, если бот его передал
-  var urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.has('score')) score = parseInt(urlParams.get('score'));
+  // ПЕРЕМЕННЫЕ (Важно задать начальные значения сразу!)
+  var score = 100; 
+  var num_1 = 0;
+  var num_2 = 0;
+  var num_3 = 0;
 
-  var num_1 = 0, num_2 = 0, num_3 = 0;
-  
-  function random(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
+  // Пытаемся получить счет из ссылки
+  var urlParams = new URLSearchParams(window.location.search);
+  var scoreParam = urlParams.get('score');
+  if (scoreParam) {
+      score = parseInt(scoreParam);
+  }
+
+  function random(min, max) {
+    return Math.floor(min + Math.random() * (max - min + 1));
+  }
 
   function addBonus() {
     if((num_1 == num_2) && (num_1 == num_3)) {
-        if(num_1 == 0) { alert('Loooser -1000'); score -= 1000; }
-        else if(num_1 == 7) { alert('Bingo +7777'); score += 7777; }
-        else if(num_1 == 6) { alert('Loooser -666'); score -= 666; }
-        else { alert('Bingo +500'); score += 500; }
+      if(num_1 == 0) { alert('!!! Loooser -1000 !!!'); score -= 1000; }
+      else if(num_1 == 7) { alert('!!! Bingo +7777 !!!'); score += 7777; }
+      else if(num_1 == 6) { alert('!!! Loooser -666 !!!'); score -= 666; }
+      else if(num_1 == 9) { alert('!!! Loooser -999 !!!'); score -= 999; }
+      else { alert('!!! Bingo +500 !!!'); score += 500; }
     } else {
-        score -= 1;    
+      score -= 1;    
     }
   }
-
-  // ФУНКЦИЯ ОТПРАВКИ ДАННЫХ
-  tg.onEvent('mainButtonClicked', function() {
-    tg.sendData(score.toString()); // Шлем итоговый счет боту
-  });
 
   function TryyeT() {
     if(score >= 1) {
@@ -42,23 +46,36 @@
       num_2 = random(0, 9);
       num_3 = random(0, 9);
       addBonus();
-      render(); // Рисуем экран заново
+      render();
     } else {
-      alert("Очки кончились!");
+      alert("Очки кончились! Заберите бонус в боте.");
     }
   }
 
+  // Отрисовка (вместо document.write, чтобы не ломать скрипты)
   function render() {
-    var out = '<p align="center" style="font-size:24px;"><b>Score: ' + score + ' </b></p>';
-    out += '<table border="1" width="100%" style="font-size:50px; text-align:center;"><tr>';
-    out += '<td>' + num_1 + '</td><td>' + num_2 + '</td><td>' + num_3 + '</td>';
-    out += '</tr></table><br>';
-    out += '<div align="center"><input type="button" style="padding:20px; width:80%; font-size:20px;" onclick="TryyeT();" value="Крутить!"></div>';
-    document.getElementById('container').innerHTML = out;
+    var container = document.getElementById('game-container');
+    container.innerHTML = 
+      '<p align="center" style="font-size: 24px; font-family: sans-serif;"><b>Score: ' + score + '</b></p>' +
+      '<table border="1" width="100%" style="font-size: 60px; text-align: center; font-family: serif; background: white;">' +
+        '<tr>' +
+          '<td><b>' + num_1 + '</b></td>' +
+          '<td><b>' + num_2 + '</b></td>' +
+          '<td><b>' + num_3 + '</b></td>' +
+        '</tr>' +
+      '</table>' +
+      '<div style="text-align: center; margin-top: 30px;">' +
+        '<input type="button" value="Try yet..." onclick="TryyeT();" style="width: 80%; height: 60px; font-size: 20px; cursor: pointer;">' +
+      '</div>';
   }
+
+  // Отправка данных боту
+  tg.onEvent('mainButtonClicked', function() {
+    tg.sendData(score.toString());
+  });
 </script>
 </head>
-<body onload="render()">
-  <div id="container"></div>
+<body style="background: #ccc; margin: 0; padding: 20px;" onload="render()">
+  <div id="game-container"></div>
 </body>
 </html>
