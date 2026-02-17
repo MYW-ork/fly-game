@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fly Clicker</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        body { margin: 0; background: #64C864; overflow: hidden; font-family: sans-serif; text-align: center; }
+        #score { font-size: 30px; color: white; margin-top: 20px; pointer-events: none; }
+        .fly { position: absolute; width: 50px; height: 50px; background: black; border-radius: 50%; cursor: pointer; transition: transform 0.1s; }
+    </style>
+</head>
+<body>
+    <div id="score">Flies: 0</div>
+    <div id="game-area" style="width: 100vw; height: 100vh;"></div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем на весь экран
+
+        let score = 0;
+        const area = document.getElementById('game-area');
+        const scoreDisplay = document.getElementById('score');
+
+        function createFly() {
+            const fly = document.createElement('div');
+            fly.className = 'fly';
+            fly.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            fly.style.top = Math.random() * (window.innerHeight - 100) + 50 + 'px';
+            
+            fly.onclick = () => {
+                score++;
+                scoreDisplay.innerText = "Flies: " + score;
+                area.removeChild(fly);
+                createFly();
+                // Отправляем данные боту при каждом клике или при закрытии?
+                // Лучше всего отправить финальный результат:
+                tg.sendData(score.toString()); 
+            };
+            area.appendChild(fly);
+        }
+
+        createFly();
+    </script>
+</body>
+</html>
