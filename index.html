@@ -1,66 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://telegram.org"></script>
-    <style>
-        body { margin: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; }
-        #score-text { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-size: 30px; font-family: sans-serif; z-index: 10; }
-        /* Муха */
-        #fly {
-            position: absolute;
-            width: 100px; height: 100px;
-            font-size: 60px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            top: 100px; left: 100px; /* Стартовая позиция */
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Весёлый Роджер</title>
+<script src="https://telegram.org"></script>
+<style>
+    body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 10px; }
+    table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .num-slot { font-size: 60px; font-weight: bold; background: #eee; padding: 20px; border: 2px solid #ccc; }
+    .btn-try { width: 100%; height: 60px; font-size: 20px; background: #34cceb; color: white; border: none; border-radius: 5px; cursor: pointer; }
+</style>
 </head>
-<body>
-    <div id="score-text">Мух: <span id="val">0</span></div>
-    <div id="fly">🪰</div>
+<body onload="init()">
+    <div id="game"></div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
+    var tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.MainButton.setText("ЗАБРАТЬ ВЫИГРЫШ").show();
 
-        let score = 0;
-        const fly = document.getElementById('fly');
-        const val = document.getElementById('val');
+    var score = 100; // Стартовые очки (бот потом пришлет актуальные)
+    var nums = [0, 0, 0];
 
-        function move() {
-            // Самый примитивный способ движения
-            const x = Math.floor(Math.random() * (window.innerWidth - 100));
-            const y = Math.floor(Math.random() * (window.innerHeight - 150)) + 50;
-            
-            fly.style.left = x + 'px';
-            fly.style.top = y + 'px';
+    function random(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
+
+    function draw() {
+        var html = '<p align="center"><b>Твой баланс: ' + score + ' </b></p>';
+        html += '<table border="1" width="100%" height="200"><tr>';
+        for(var i=0; i<3; i++) {
+            html += '<td align="center" class="num-slot">' + nums[i] + '</td>';
         }
-
-        // Обработка нажатия
-        fly.onclick = function() {
-            score++;
-            val.textContent = score;
-            move();
-        };
+        html += '</tr></table><br>';
+        html += '<input type="button" class="btn-try" onclick="play();" value="КРУТИТЬ (1 очко)">';
         
-        // Для сенсорных экранов
-        fly.ontouchstart = function(e) {
-            e.preventDefault();
-            score++;
-            val.textContent = score;
-            move();
-        };
+        // Таблица выигрышей (мини-версия)
+        html += '<br><br><small>777: +7777 | 000: -1000 | 666: -666</small>';
+        
+        document.getElementById('game').innerHTML = html;
+    }
 
-        tg.onEvent('mainButtonClicked', () => {
-            tg.sendData(score.toString());
-        });
+    function play() {
+        if(score < 1) { alert("Очки кончились!"); return; }
+        
+        nums[0] = random(0, 9);
+        nums[1] = random(0, 9);
+        nums[2] = random(0, 9);
 
-        // Двигаем первый раз при загрузке
-        move();
+        if (nums[0] == nums[1] && nums[0] == nums[2]) {
+            var n = nums[0];
+            if (n == 7) score += 7777;
+            else if (n == 0) score -= 1000;
+            else if (n == 6) score -= 666;
+            else if (n == 9) score -= 999;
+            else score += (n * 100);
+            alert("БОНУС!");
+        } else {
+            score -= 1;
+        }
+        draw();
+    }
+
+    function init() {
+        // Если бот передал баланс через URL (например ?score=500)
+        var urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('score')) score = parseInt(urlParams.get('score'));
+        draw();
+    }
+
+    tg.onEvent('mainButtonClicked', function() {
+        tg.sendData(score.toString()); // Отправляем итоговый счет боту
+    });
     </script>
 </body>
 </html>
