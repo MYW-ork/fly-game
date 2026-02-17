@@ -1,81 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Весёлый роджер</title>
-<script src="https://telegram.org"></script>
-<script language="JavaScript">
-  // Инициализация Telegram WebApp
-  var tg = window.Telegram.WebApp;
-  tg.expand();
-  tg.MainButton.setText("СОХРАНИТЬ ОЧКИ В БОТЕ").show();
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org"></script>
+    <script>
+        var tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.setText("СОХРАНИТЬ В БОТЕ").show();
 
-  // ПЕРЕМЕННЫЕ (Важно задать начальные значения сразу!)
-  var score = 100; 
-  var num_1 = 0;
-  var num_2 = 0;
-  var num_3 = 0;
+        // Жёсткие дефолты
+        var score = 100;
+        var n1 = 0, n2 = 0, n3 = 0;
 
-  // Пытаемся получить счет из ссылки
-  var urlParams = new URLSearchParams(window.location.search);
-  var scoreParam = urlParams.get('score');
-  if (scoreParam) {
-      score = parseInt(scoreParam);
-  }
+        // Самый простой парсер ссылки
+        var params = new URLSearchParams(window.location.search);
+        var s = params.get('score');
+        if (s) { score = parseInt(s); }
 
-  function random(min, max) {
-    return Math.floor(min + Math.random() * (max - min + 1));
-  }
+        function play() {
+            if (score <= 0) { alert("Очки всё!"); return; }
+            n1 = Math.floor(Math.random() * 10);
+            n2 = Math.floor(Math.random() * 10);
+            n3 = Math.floor(Math.random() * 10);
 
-  function addBonus() {
-    if((num_1 == num_2) && (num_1 == num_3)) {
-      if(num_1 == 0) { alert('!!! Loooser -1000 !!!'); score -= 1000; }
-      else if(num_1 == 7) { alert('!!! Bingo +7777 !!!'); score += 7777; }
-      else if(num_1 == 6) { alert('!!! Loooser -666 !!!'); score -= 666; }
-      else if(num_1 == 9) { alert('!!! Loooser -999 !!!'); score -= 999; }
-      else { alert('!!! Bingo +500 !!!'); score += 500; }
-    } else {
-      score -= 1;    
-    }
-  }
+            if (n1 == n2 && n1 == n3) {
+                if (n1 == 7) score += 777;
+                else if (n1 == 0) score -= 500;
+                else score += 100;
+                alert("БИНГО!");
+            } else {
+                score -= 1;
+            }
+            render();
+        }
 
-  function TryyeT() {
-    if(score >= 1) {
-      num_1 = random(0, 9);
-      num_2 = random(0, 9);
-      num_3 = random(0, 9);
-      addBonus();
-      render();
-    } else {
-      alert("Очки кончились! Заберите бонус в боте.");
-    }
-  }
+        function render() {
+            document.getElementById('sc').textContent = score;
+            document.getElementById('slots').textContent = n1 + " | " + n2 + " | " + n3;
+        }
 
-  // Отрисовка (вместо document.write, чтобы не ломать скрипты)
-  function render() {
-    var container = document.getElementById('game-container');
-    container.innerHTML = 
-      '<p align="center" style="font-size: 24px; font-family: sans-serif;"><b>Score: ' + score + '</b></p>' +
-      '<table border="1" width="100%" style="font-size: 60px; text-align: center; font-family: serif; background: white;">' +
-        '<tr>' +
-          '<td><b>' + num_1 + '</b></td>' +
-          '<td><b>' + num_2 + '</b></td>' +
-          '<td><b>' + num_3 + '</b></td>' +
-        '</tr>' +
-      '</table>' +
-      '<div style="text-align: center; margin-top: 30px;">' +
-        '<input type="button" value="Try yet..." onclick="TryyeT();" style="width: 80%; height: 60px; font-size: 20px; cursor: pointer;">' +
-      '</div>';
-  }
-
-  // Отправка данных боту
-  tg.onEvent('mainButtonClicked', function() {
-    tg.sendData(score.toString());
-  });
-</script>
+        tg.onEvent('mainButtonClicked', function() {
+            tg.sendData(score.toString());
+        });
+    </script>
 </head>
-<body style="background: #ccc; margin: 0; padding: 20px;" onload="render()">
-  <div id="game-container"></div>
+<body onload="render()" style="text-align:center; background:#eee; font-family:sans-serif;">
+    <h2>🎰 Роджер 🎰</h2>
+    <h1 id="sc">...</h1>
+    <div id="slots" style="font-size:50px; background:white; margin:20px; padding:20px; border:2px solid #000;">0 | 0 | 0</div>
+    <button onclick="play()" style="width:80%; height:60px; font-size:20px;">КРУТИТЬ!</button>
 </body>
 </html>
