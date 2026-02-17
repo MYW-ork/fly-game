@@ -3,74 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fly Clicker Pro</title>
+    <title>Fly Game Final</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { margin: 0; padding: 0; background: #27ae60; overflow: hidden; font-family: sans-serif; }
-        #ui { 
-            position: absolute; top: 10px; width: 100%; text-align: center; 
-            color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            z-index: 10; pointer-events: none;
-        }
-        #game-canvas { width: 100vw; height: 100vh; position: relative; }
-        .fly {
-            position: absolute; width: 80px; height: 80px;
-            background: rgba(0,0,0,0.1); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 50px; cursor: pointer; z-index: 5;
-            transition: transform 0.05s active;
+        body { margin: 0; padding: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; }
+        #ui { position: absolute; top: 15px; width: 100%; text-align: center; color: white; font-size: 28px; z-index: 10; pointer-events: none; font-weight: bold; }
+        #game-canvas { width: 100%; height: 100%; position: relative; }
+        /* Муха теперь существует всегда, мы её только двигаем */
+        #the-fly {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+            cursor: pointer;
+            z-index: 999;
+            background: rgba(0,0,0,0.01); /* Почти прозрачный фон для площади клика */
+            border-radius: 50%;
+            touch-action: none;
         }
     </style>
 </head>
 <body>
-    <div id="ui">Счет: <span id="score">0</span></div>
-    <div id="game-canvas"></div>
+    <div id="ui">Мух: <span id="score">0</span></div>
+    <div id="game-canvas">
+        <div id="the-fly">🪰</div>
+    </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
+        tg.MainButton.setText("СОХРАНИТЬ И ВЫЙТИ").show();
 
         let score = 0;
         const scoreDisplay = document.getElementById('score');
-        const canvas = document.getElementById('game-canvas');
+        const fly = document.getElementById('the-fly');
 
-        function spawnFly() {
-            canvas.textContent = ""; // Очищаем поле (через textContent - чисто!)
+        function moveFly() {
+            // Расчет безопасной зоны
+            const maxX = window.innerWidth - 100;
+            const maxY = window.innerHeight - 180;
             
-            const fly = document.createElement('div');
-            fly.className = 'fly';
-            
-            // Твой любимый метод создания контента вручную
-            const flyIcon = document.createTextNode("🪰");
-            fly.appendChild(flyIcon);
+            const randomX = Math.floor(Math.random() * maxX) + 10;
+            const randomY = Math.floor(Math.random() * maxY) + 100;
 
-            // Случайные координаты с отступами
-            const x = Math.floor(Math.random() * (10)) + 10;
-            const y = Math.floor(Math.random() * (15)) + 80;
-            
-            fly.style.left = x + 'px';
-            fly.style.top = y + 'px';
-
-            const hit = (e) => {
-                e.preventDefault();
-                score++;
-                scoreDisplay.textContent = score;
-                spawnFly();
-            };
-
-            fly.onclick = hit;
-            fly.ontouchstart = hit;
-
-            canvas.appendChild(fly);
+            fly.style.left = randomX + 'px';
+            fly.style.top = randomY + 'px';
         }
+
+        const handleHit = (e) => {
+            if (e) e.preventDefault();
+            score++;
+            scoreDisplay.textContent = score;
+            moveFly();
+        };
+
+        // Слушаем и клик, и тап
+        fly.addEventListener('touchstart', handleHit);
+        fly.addEventListener('mousedown', handleHit);
 
         tg.onEvent('mainButtonClicked', function() {
             tg.sendData(score.toString());
             tg.close();
         });
 
-        spawnFly(); // Поехали!
+        // Сразу ставим в случайное место при загрузке
+        window.onload = () => {
+            moveFly();
+        };
     </script>
 </body>
 </html>
