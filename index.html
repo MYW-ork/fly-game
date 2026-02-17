@@ -3,54 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fly Game Final</title>
+    <title>Fly Game Alive</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { margin: 0; padding: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; }
-        #ui { position: absolute; top: 15px; width: 100%; text-align: center; color: white; font-size: 28px; z-index: 10; pointer-events: none; font-weight: bold; }
-        #game-canvas { width: 100%; height: 100%; position: relative; }
-        /* Муха теперь существует всегда, мы её только двигаем */
+        body { 
+            margin: 0; padding: 0; background: #27ae60; 
+            overflow: hidden; height: 100vh; width: 100vw; 
+        }
+        #ui { 
+            position: absolute; top: 15px; width: 100%; text-align: center; 
+            color: white; font-size: 28px; z-index: 100; pointer-events: none; 
+            font-family: sans-serif; font-weight: bold;
+        }
+        #game-area { 
+            width: 100vw; height: 100vh; 
+            position: relative; /* ЭТО КЛЮЧЕВОЕ! Чтобы муха летала внутри */
+        }
         #the-fly {
-            position: absolute;
+            position: absolute; /* Теперь это сработает правильно */
             width: 90px;
             height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 55px;
+            font-size: 60px;
             cursor: pointer;
-            z-index: 999;
-            background: rgba(0,0,0,0.01); /* Почти прозрачный фон для площади клика */
-            border-radius: 50%;
+            z-index: 50;
             touch-action: none;
+            user-select: none;
+            /* Начальная позиция, чтобы не залипала в нуле */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
 <body>
-    <div id="ui">Мух: <span id="score">0</span></div>
-    <div id="game-canvas">
+    <div id="ui">Счет: <span id="score">0</span></div>
+    <div id="game-area">
         <div id="the-fly">🪰</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setText("СОХРАНИТЬ И ВЫЙТИ").show();
+        tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
 
         let score = 0;
         const scoreDisplay = document.getElementById('score');
         const fly = document.getElementById('the-fly');
 
         function moveFly() {
-            // Расчет безопасной зоны
-            const maxX = window.innerWidth - 100;
-            const maxY = window.innerHeight - 180;
+            // Учитываем размер мухи (90px) и отступы
+            const width = window.innerWidth;
+            const height = window.innerHeight;
             
-            const randomX = Math.floor(Math.random() * maxX) + 10;
-            const randomY = Math.floor(Math.random() * maxY) + 100;
+            const randomX = Math.floor(Math.random() * (width - 100)) + 10;
+            const randomY = Math.floor(Math.random() * (height - 200)) + 100;
 
-            fly.style.left = randomX + 'px';
-            fly.style.top = randomY + 'px';
+            // Принудительно задаем пиксели и сбрасываем центрирование
+            fly.style.transform = 'none'; 
+            fly.style.left = randomX + "px";
+            fly.style.top = randomY + "px";
         }
 
         const handleHit = (e) => {
@@ -60,7 +74,6 @@
             moveFly();
         };
 
-        // Слушаем и клик, и тап
         fly.addEventListener('touchstart', handleHit);
         fly.addEventListener('mousedown', handleHit);
 
@@ -69,10 +82,8 @@
             tg.close();
         });
 
-        // Сразу ставим в случайное место при загрузке
-        window.onload = () => {
-            moveFly();
-        };
+        // Запуск!
+        window.onload = moveFly;
     </script>
 </body>
 </html>
