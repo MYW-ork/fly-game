@@ -2,58 +2,75 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Debug Fly</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fly Clicker Pro</title>
     <script src="https://telegram.org"></script>
     <style>
-        /* Делаем фон серым, чтобы видеть границы */
-        body { margin: 0; background: #555; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        
-        #game-canvas {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            background: #27ae60; /* Зеленое поле */
+        body { margin: 0; padding: 0; background: #27ae60; overflow: hidden; font-family: sans-serif; }
+        #ui { 
+            position: absolute; top: 10px; width: 100%; text-align: center; 
+            color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 10; pointer-events: none;
         }
-
+        #game-canvas { width: 100vw; height: 100vh; position: relative; }
         .fly {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: black;      /* Черный квадрат */
-            border: 5px solid red;  /* С красной рамкой */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 50px;
-            color: white;
-            z-index: 999;
-            top: 50% !important;   /* Прямо по центру */
-            left: 50% !important;
-            transform: translate(-50%, -50%);
+            position: absolute; width: 80px; height: 80px;
+            background: rgba(0,0,0,0.1); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 50px; cursor: pointer; z-index: 5;
+            transition: transform 0.05s active;
         }
     </style>
 </head>
 <body>
-    <div id="game-canvas">
-        <!-- Муха прямо в коде, без скриптов для проверки -->
-        <div class="fly" id="test-fly">🪰</div>
-    </div>
+    <div id="ui">Счет: <span id="score">0</span></div>
+    <div id="game-canvas"></div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
 
-        const fly = document.getElementById('test-fly');
         let score = 0;
+        const scoreDisplay = document.getElementById('score');
+        const canvas = document.getElementById('game-canvas');
 
-        fly.onclick = function() {
-            score++;
-            // При клике муха просто прыгнет в случайное место
-            fly.style.top = Math.random() * 80 + '%';
-            fly.style.left = Math.random() * 80 + '%';
-            fly.style.transform = 'none'; 
-            console.log("Очки:", score);
-        };
+        function spawnFly() {
+            canvas.textContent = ""; // Очищаем поле (через textContent - чисто!)
+            
+            const fly = document.createElement('div');
+            fly.className = 'fly';
+            
+            // Твой любимый метод создания контента вручную
+            const flyIcon = document.createTextNode("🪰");
+            fly.appendChild(flyIcon);
+
+            // Случайные координаты с отступами
+            const x = Math.floor(Math.random() * (window.innerWidth - 100)) + 10;
+            const y = Math.floor(Math.random() * (window.innerHeight - 150)) + 80;
+            
+            fly.style.left = x + 'px';
+            fly.style.top = y + 'px';
+
+            const hit = (e) => {
+                e.preventDefault();
+                score++;
+                scoreDisplay.textContent = score;
+                spawnFly();
+            };
+
+            fly.onclick = hit;
+            fly.ontouchstart = hit;
+
+            canvas.appendChild(fly);
+        }
+
+        tg.onEvent('mainButtonClicked', function() {
+            tg.sendData(score.toString());
+            tg.close();
+        });
+
+        spawnFly(); // Поехали!
     </script>
 </body>
 </html>
