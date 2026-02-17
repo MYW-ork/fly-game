@@ -9,26 +9,27 @@
         tg.expand();
         tg.MainButton.setText("СОХРАНИТЬ В БОТЕ").show();
 
-        // Жёсткие дефолты
-        var score = 100;
+        // Берем из URL или ставим 0, если совсем пусто
+        var urlParams = new URLSearchParams(window.location.search);
+        var score = parseInt(urlParams.get('score')); 
+        
         var n1 = 0, n2 = 0, n3 = 0;
 
-        // Самый простой парсер ссылки
-        var params = new URLSearchParams(window.location.search);
-        var s = params.get('score');
-        if (s) { score = parseInt(s); }
-
         function play() {
-            if (score <= 0) { alert("Очки всё!"); return; }
+            if (isNaN(score) || score <= 0) {
+                alert("Нет очков для игры!");
+                return;
+            }
+            
             n1 = Math.floor(Math.random() * 10);
             n2 = Math.floor(Math.random() * 10);
             n3 = Math.floor(Math.random() * 10);
 
+            // Твоя логика бонусов
             if (n1 == n2 && n1 == n3) {
-                if (n1 == 7) score += 777;
-                else if (n1 == 0) score -= 500;
-                else score += 100;
-                alert("БИНГО!");
+                if (n1 == 7) score += 7777;
+                else if (n1 == 0) score -= 1000;
+                else score += 500;
             } else {
                 score -= 1;
             }
@@ -36,19 +37,20 @@
         }
 
         function render() {
-            document.getElementById('sc').textContent = score;
+            // Если тут NaN - значит в ссылке от бота пришла ерунда!
+            document.getElementById('sc').textContent = "Баланс: " + score;
             document.getElementById('slots').textContent = n1 + " | " + n2 + " | " + n3;
         }
 
         tg.onEvent('mainButtonClicked', function() {
             tg.sendData(score.toString());
+            tg.close();
         });
     </script>
 </head>
-<body onload="render()" style="text-align:center; background:#eee; font-family:sans-serif;">
-    <h2>🎰 Роджер 🎰</h2>
-    <h1 id="sc">...</h1>
-    <div id="slots" style="font-size:50px; background:white; margin:20px; padding:20px; border:2px solid #000;">0 | 0 | 0</div>
-    <button onclick="play()" style="width:80%; height:60px; font-size:20px;">КРУТИТЬ!</button>
+<body onload="render()" style="text-align:center; background:#2c3e50; color:white; font-family:sans-serif;">
+    <h1 id="sc">Загрузка...</h1>
+    <div id="slots" style="font-size:60px; margin:20px; background:white; color:black;">0 | 0 | 0</div>
+    <button onclick="play()" style="width:80%; height:60px;">КРУТИТЬ!</button>
 </body>
 </html>
