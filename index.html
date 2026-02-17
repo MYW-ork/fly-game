@@ -3,138 +3,99 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fly OS Engine</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { margin: 0; padding: 0; background: #1a1a1a; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #container { width: 100vw; height: 100vh; position: relative; background: radial-gradient(circle, #27ae60 0%, #1e8449 100%); }
-        /* Стиль для объектов, созданных через наш движок */
-        .entity-fly { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); user-select: none; }
+        body { margin: 0; background: #27ae60; overflow: hidden; height: 100vh; width: 100vw; }
+        #container { width: 100%; height: 100%; position: relative; }
+        /* Твой класс для мухи */
+        .fly-unit {
+            position: absolute;
+            width: 90px; height: 90px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 60px; cursor: pointer; z-index: 999;
+            transition: all 0.7s; /* Чтобы плавно летала */
+        }
+        #score-board {
+            position: absolute; top: 10px; width: 100%; text-align: center;
+            color: white; font-size: 30px; font-family: sans-serif; z-index: 100;
+        }
     </style>
 </head>
 <body>
-    <div id='container'></div>
+    <div id="container">
+        <div id="score-board">Мух: <span id="val">0</span></div>
+    </div>
 
     <script>
-    // --- CONFIG SECTION (Твой стиль) ---
-    const Config = {
-        style: {
-            flySize: "80px",
-            fontSize: "55px",
-            uiColor: "rgba(255, 255, 255, 0.9)",
-            bgPrimary: "#27ae60"
-        },
-        game: {
-            spawnDelay: 300,
-            moveInterval: 1200
-        }
-    };
-
-    // --- CORE ENGINE (Твоя логика add_Object) ---
-    const Engine = {
-        container: document.getElementById('container'),
-        score: 0,
-
-        // Универсальный конструктор (адаптация твоего add_Object)
-        addObject: function(type, id, content, style) {
-            let el = document.createElement(type);
-            el.id = id;
-            el.className = "entity-" + id.split('_')[0].toLowerCase();
-            
-            // Наполняем контентом (твой метод вручную)
-            if (content) {
-                let textNode = document.createTextNode(content);
-                el.appendChild(textNode);
-            }
-
-            // Применяем стили из конфига и аргументов
-            Object.assign(el.style, {
-                position: "absolute",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                touchAction: "none"
-            }, style);
-
-            this.container.appendChild(el);
-            return el;
-        },
-
-        updateUI: function() {
-            const ui = document.getElementById('UI_Score');
-            ui.textContent = "Счет: " + this.score;
-            window.Telegram.WebApp.MainButton.setText("СОХРАНИТЬ: " + this.score).show();
-        }
-    };
-
-    // --- GAME LOGIC MODULE ---
-    const Game = {
-        fly: null,
-        
-        init: function() {
-            // Создаем UI
-            Engine.addObject('div', 'UI_Score', 'Счет: 0', {
-                top: '20px', width: '100%', color: Config.style.uiColor,
-                fontSize: '30px', fontWeight: 'bold', zIndex: '100', pointerEvents: 'none'
-            });
-
-            // Создаем Муху через Движок
-            this.fly = Engine.addObject('div', 'Fly_Target', '🪰', {
-                width: Config.style.flySize,
-                height: Config.style.flySize,
-                fontSize: Config.style.fontSize,
-                zIndex: '50'
-            });
-
-            // События
-            const hitHandler = (e) => {
-                e.preventDefault();
-                this.onHit();
-            };
-            this.fly.addEventListener('touchstart', hitHandler);
-            this.fly.addEventListener('mousedown', hitHandler);
-
-            // Запуск циклов
-            this.relocate();
-            setInterval(() => this.relocate(), Config.game.moveInterval);
-        },
-
-        relocate: function() {
-            const x = Math.floor(Math.random() * (window.innerWidth - 100)) + "px";
-            const y = Math.floor(Math.random() * (window.innerHeight - 200)) + 100 + "px";
-            this.fly.style.left = x;
-            this.fly.style.top = y;
-        },
-
-        onHit: function() {
-            Engine.score++;
-            Engine.updateUI();
-            
-            // Эффект "Оглушения" (Твоя идея с изменением состояния)
-            this.fly.textContent = "😵‍💫";
-            this.fly.style.transform = "scale(1.5)";
-            
-            setTimeout(() => {
-                this.fly.textContent = "🪰";
-                this.fly.style.transform = "scale(1)";
-                this.relocate();
-            }, Config.game.spawnDelay);
-        }
-    };
-
-    // --- START ---
-    window.onload = () => {
-        const tg = window.Telegram.WebApp;
+        var tg = window.Telegram.WebApp;
         tg.expand();
-        
-        Game.init();
+        tg.MainButton.setText("СОХРАНИТЬ РЕКОРД").show();
 
-        tg.onEvent('mainButtonClicked', () => {
-            tg.sendData(Engine.score.toString());
-            tg.close();
+        var container = document.getElementById("container");
+        var scoreVal = document.getElementById("val");
+        var score = 0;
+
+        // ТВОЯ легендарная функция add_Object (адаптированная под минимализм)
+        function add_Object(object, id, content, posX, posY, current) {
+            var newObj = document.createElement(object);
+            newObj.id = id;
+            newObj.className = "fly-unit";
+            
+            // Твой метод добавления контента вручную
+            var txt = document.createTextNode(content);
+            newObj.appendChild(txt);
+            
+            newObj.style.left = posX + "px";
+            newObj.style.top = posY + "px";
+            
+            current.appendChild(newObj);
+            return newObj;
+        }
+
+        // Логика перемещения
+        function moveFly(obj) {
+            var x = Math.floor(Math.random() * (window.innerWidth - 100));
+            var y = Math.floor(Math.random() * (window.innerHeight - 200)) + 80;
+            obj.style.left = x + "px";
+            obj.style.top = y + "px";
+        }
+
+        // Старт игры
+        function init() {
+            // Создаем муху твоим методом
+            var fly = add_Object('div', 'the_fly', '🪰', 100, 100, container);
+
+            // Обработка клика/тапа
+            var hit = function(e) {
+                if(e) e.preventDefault();
+                score++;
+                scoreVal.innerHTML = score;
+                
+                fly.innerHTML = ""; // Очистка
+                fly.appendChild(document.createTextNode("😵‍💫")); // Оглушение
+                
+                setTimeout(function() {
+                    fly.innerHTML = "";
+                    fly.appendChild(document.createTextNode("🪰"));
+                    moveFly(fly);
+                }, 300);
+            };
+
+            fly.onclick = hit;
+            fly.ontouchstart = hit;
+
+            // Летает сама раз в секунду
+            setInterval(function() {
+                moveFly(fly);
+            }, 1100);
+        }
+
+        tg.onEvent('mainButtonClicked', function() {
+            tg.sendData(score.toString());
         });
-    };
+
+        // Запуск
+        window.onload = init;
     </script>
 </body>
 </html>
