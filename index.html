@@ -2,65 +2,71 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org"></script>
     <script>
         var tg = window.Telegram.WebApp;
         tg.expand();
 
+        // 1. Инициализируем переменную один раз при загрузке
         var score = 0;
 
         function initGame() {
-            // Ищем в URL именно "s=" (наш секретный ключ для очков)
+            // Ищем s= в URL
             var urlStr = window.location.search;
             var match = urlStr.match(/s=(\d+)/); 
             
             if (match && match[1]) {
-                // Если нашли s=число, берем его
                 score = parseInt(match[1]);
             } else {
-                // Если нет нашего s=, ПРИНУДИТЕЛЬНО ставим 8
-                score = 8;
-                syncUrl();
+                score = 8; // Дефолт, если бот промолчал
             }
             render();
         }
 
-        function syncUrl() {
-            // Записываем в URL именно s=число, чтобы не путать с ID Телеграма
-            var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?s=' + score;
-            window.history.replaceState({path:newUrl}, '', newUrl);
-        }
-
         function play() {
-            score = score - 1;
-            syncUrl();
-            render();
+            if (score > 0) {
+                score = score - 1; // Уменьшаем НАСТОЯЩУЮ переменную в памяти
+                
+                // Пробуем обновить URL (для Хрома сработает, для ТГ — как пойдет)
+                try {
+                    var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?s=' + score;
+                    window.history.replaceState({path:newUrl}, '', newUrl);
+                } catch(e) { console.log("URL freeze"); }
+
+                render(); // ОБЯЗАТЕЛЬНО перерисовываем экран
+            } else {
+                alert("Очки кончились!");
+            }
         }
 
         function render() {
+            // Рисуем актуальное значение из переменной score
             document.getElementById('sc').textContent = "Score: " + score;
-            tg.MainButton.setText("СОХРАНИТЬ " + score).show();
+            // Обновляем кнопку Телеграма — это наш главный индикатор синхронизации
+            tg.MainButton.setText("СОХРАНИТЬ РЕКОРД: " + score).show();
         }
 
+        // Самый важный момент: отправка того, что в переменной score
         tg.onEvent('mainButtonClicked', function() {
             tg.sendData(score.toString());
+            tg.close();
         });
     </script>
 </head>
 <body onload="initGame()" style="text-align:center; background:#1a1a1a; color:white; font-family:sans-serif; padding-top:50px;">
     
-    <div style="background:#2c3e50; padding:30px; border-radius:30px; border: 4px solid #34cceb;">
+    <div style="background:#2c3e50; padding:30px; border-radius:30px; border: 4px solid #34cceb; display:inline-block;">
         <h1 id="sc" style="font-size:50px; margin:0; color:#34cceb;">Score: ?</h1>
     </div>
 
     <div style="margin-top:40px;">
-        <button onclick="play()" style="width:180px; height:180px; border-radius:50%; border:none; background:#34cceb; color:white; font-size:35px; font-weight:bold; box-shadow: 0 8px #2980b9; cursor:pointer;">
+        <button onclick="play()" style="width:180px; height:180px; border-radius:50%; border:none; background:#34cceb; color:white; font-size:35px; font-weight:bold; box-shadow: 0 8px #2980b9; cursor:pointer; active: transform:translateY(4px);">
             ТЫК!
         </button>
     </div>
 
-    <p style="margin-top:40px; opacity:0.6; font-size:12px;">Фильтр ID Телеграма активен 🚀</p>
+    <p style="margin-top:40px; opacity:0.6; font-size:12px;">Синхронизация через MainButton активна 🚀</p>
 
 </body>
 </html>
