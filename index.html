@@ -34,7 +34,6 @@
                     window.history.replaceState({path:newUrl}, '', newUrl);
                 } catch(e) { console.log("URL freeze"); }
 
-                saveAndExit();
                 render(); // ОБЯЗАТЕЛЬНО перерисовываем экран
             } else {
                 alert("Очки кончились!");
