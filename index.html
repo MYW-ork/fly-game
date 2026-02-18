@@ -34,6 +34,7 @@
                     window.history.replaceState({path:newUrl}, '', newUrl);
                 } catch(e) { console.log("URL freeze"); }
 
+                saveAndExit();
                 render(); // ОБЯЗАТЕЛЬНО перерисовываем экран
             } else {
                 alert("Очки кончились!");
@@ -46,6 +47,12 @@
             // Обновляем кнопку Телеграма — это наш главный индикатор синхронизации
             tg.MainButton.setText("СОХРАНИТЬ РЕКОРД: " + score).show();
         }
+
+        function saveAndExit() {
+    // Эта команда отправит score боту и ЗАКРОЕТ игру
+    tg.sendData(score.toString());
+        }
+        
 
         // Самый важный момент: отправка того, что в переменной score
         tg.onEvent('mainButtonClicked', function() {
