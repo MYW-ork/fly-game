@@ -7,52 +7,42 @@
     <script>
         var tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.setText("СОХРАНИТЬ В БОТЕ").show();
 
-        // --- УЛЬТРА-ПАРСИНГ ---
-        function getScore() {
-            var query = window.location.search.substring(1); // Берем всё после "?"
-            // Убираем всё, что не цифры (на случай, если там "?score=133" или "?133&v=1")
-            var cleanQuery = query.replace(/[^0-9]/g, ''); 
-            var parsed = parseInt(cleanQuery);
+        // Глобальная переменная
+        var score = 0;
+
+        // ФУНКЦИЯ ЗАГРУЗКИ (Твоя первостепенная задача)
+        function initGame() {
+            // 1. Проверяем, есть ли уже число в URL
+            var query = window.location.search.substring(1).replace(/[^0-9]/g, '');
             
-            // Если совсем пусто или NaN — ставим 133 (твой бонус) или 0
-            return isNaN(parsed) ? 133 : parsed; 
-        }
-
-        var score = getScore();
-        var n1 = 0, n2 = 0, n3 = 0;
-
-        function play() {
-            if (score <= 0) {
-                alert("Очки закончились!");
-                return;
-            }
-
-            n1 = Math.floor(Math.random() * 10);
-            n2 = Math.floor(Math.random() * 10);
-            n3 = Math.floor(Math.random() * 10);
-
-            if (n1 == n2 && n1 == n3) {
-                score += 500;
+            if (query === "" || isNaN(parseInt(query))) {
+                // Если там пусто или NaN — ПРИНУДИТЕЛЬНО ставим 8
+                score = 8;
+                var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + score;
+                window.history.replaceState({path:newUrl}, '', newUrl);
             } else {
-                score = score - 1;
+                // Если число уже есть (например после клика) — берем его
+                score = parseInt(query);
             }
-
-            syncUrl();
+            
             render();
         }
 
-        function syncUrl() {
-            // Магия обновления адресной строки
+        function play() {
+            score = score - 1; // Убавляем единичку
+            
+            // Сразу синхронизируем URL
             var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + score;
             window.history.replaceState({path:newUrl}, '', newUrl);
+            
+            render();
         }
 
         function render() {
-            document.getElementById('sc').textContent = "Очки: " + score;
-            document.getElementById('slots').textContent = n1 + " | " + n2 + " | " + n3;
-            tg.MainButton.setText("ЗАПИСАТЬ " + score + " ОЧКОВ");
+            // Рисуем число на экране
+            document.getElementById('sc').textContent = "Score: " + score;
+            tg.MainButton.setText("СОХРАНИТЬ " + score).show();
         }
 
         tg.onEvent('mainButtonClicked', function() {
@@ -60,14 +50,19 @@
         });
     </script>
 </head>
-<body onload="render()" style="text-align:center; background:#2c3e50; color:white; font-family:sans-serif; padding-top:20px;">
-    <h2 id="sc">Загрузка...</h2>
-    <div id="slots" style="font-size:60px; background:white; color:black; margin:20px; padding:15px; border-radius:10px; font-weight:bold;">
-        0 | 0 | 0
+<body onload="initGame()" style="text-align:center; background:#2c3e50; color:white; font-family:sans-serif; padding-top:50px;">
+    
+    <div style="background:#34495e; padding:20px; border-radius:20px; display:inline-block; border: 3px solid #e74c3c;">
+        <h1 id="sc" style="font-size:40px; margin:0;">Score: ?</h1>
     </div>
-    <button onclick="play()" style="width:85%; height:70px; font-size:26px; background:#e74c3c; color:white; border:none; border-radius:15px; box-shadow: 0 6px #c0392b;">
-        КРУТИТЬ!
-    </button>
-    <p style="margin-top:20px; font-size:12px; opacity:0.5;">Синхронизация URL активна</p>
+
+    <div style="margin-top:30px;">
+        <button onclick="play()" style="width:200px; height:200px; border-radius:50%; border:none; background:#e74c3c; color:white; font-size:30px; font-weight:bold; box-shadow: 0 10px #c0392b; cursor:pointer; active: transform:translateY(5px); outline:none;">
+            КЛИК!
+        </button>
+    </div>
+
+    <p style="margin-top:40px; opacity:0.5;">Первостепенная задача: <br>Принудительная 8 в URL</p>
+
 </body>
 </html>
