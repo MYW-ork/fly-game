@@ -4,56 +4,69 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org"></script>
-    <style>
-        body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; text-align: center; }
-        #slots { font-size: 60px; background: white; color: black; margin: 20px; padding: 20px; border-radius: 15px; }
-        button { width: 80%; height: 70px; font-size: 24px; background: #e74c3c; color: white; border: none; border-radius: 10px; cursor: pointer; }
-    </style>
-</head>
-<body onload="init()">
-    <h1 id="balance">Загрузка...</h1>
-    <div id="slots">0 | 0 | 0</div>
-    <button onclick="play()">КРУТИТЬ!</button>
-    <p style="opacity:0.3; font-size:10px; margin-top:20px;">Авто-сохранение активно</p>
-
     <script>
         var tg = window.Telegram.WebApp;
         tg.expand();
 
-        var botToken = 'ТВОЙ_ТОКЕН_ОТ_BOTFATHER'; // ВСТАВЬ СЮДА ТОКЕН
+        // 1. Инициализируем переменную один раз при загрузке
         var score = 0;
-        var n1=0, n2=0, n3=0;
 
-        function init() {
-            // Парсим очки из URL (?133)
-            var query = window.location.search.substring(1).replace(/[^0-9]/g, '');
-            score = parseInt(query) || 0;
+        function initGame() {
+            // Ищем s= в URL
+            var urlStr = window.location.search;
+            var match = urlStr.match(/s=(\d+)/); 
+            
+            if (match && match[1]) {
+                score = parseInt(match[1]);
+            } else {
+                score = 8; // Дефолт, если бот промолчал
+            }
             render();
         }
 
         function play() {
-            if (score <= 0) { alert("Очки кончились!"); return; }
-            n1 = Math.floor(Math.random() * 10);
-            n2 = Math.floor(Math.random() * 10);
-            n3 = Math.floor(Math.random() * 10);
+            if (score > 0) {
+                score = score - 1; // Уменьшаем НАСТОЯЩУЮ переменную в памяти
+                
+                // Пробуем обновить URL (для Хрома сработает, для ТГ — как пойдет)
+                try {
+                    var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?s=' + score;
+                    window.history.replaceState({path:newUrl}, '', newUrl);
+                } catch(e) { console.log("URL freeze"); }
 
-            if (n1 == n2 && n1 == n3) score += 500;
-            else score -= 1;
-
-            render();
-            sync(); // Авто-синхронизация при каждом клике
+                render(); // ОБЯЗАТЕЛЬНО перерисовываем экран
+            } else {
+                alert("Очки кончились!");
+            }
         }
 
         function render() {
-            document.getElementById('balance').textContent = "Очки: " + score;
-            document.getElementById('slots').textContent = n1 + " | " + n2 + " | " + n3;
+            // Рисуем актуальное значение из переменной score
+            document.getElementById('sc').textContent = "Score: " + score;
+            // Обновляем кнопку Телеграма — это наш главный индикатор синхронизации
+            tg.MainButton.setText("СОХРАНИТЬ РЕКОРД: " + score).show();
         }
 
-        function sync() {
-            var userId = tg.initDataUnsafe.user.id;
-            // Шлем "тихий" запрос через API Telegram
-            fetch(`https://api.telegram.org{botToken}/sendMessage?chat_id=${userId}&text=UP:${score}&disable_notification=true`);
-        }
+        // Самый важный момент: отправка того, что в переменной score
+        tg.onEvent('mainButtonClicked', function() {
+            tg.sendData(score.toString());
+            tg.close();
+        });
     </script>
+</head>
+<body onload="initGame()" style="text-align:center; background:#1a1a1a; color:white; font-family:sans-serif; padding-top:50px;">
+    
+    <div style="background:#2c3e50; padding:30px; border-radius:30px; border: 4px solid #34cceb; display:inline-block;">
+        <h1 id="sc" style="font-size:50px; margin:0; color:#34cceb;">Score: ?</h1>
+    </div>
+
+    <div style="margin-top:40px;">
+        <button onclick="play()" style="width:180px; height:180px; border-radius:50%; border:none; background:#34cceb; color:white; font-size:35px; font-weight:bold; box-shadow: 0 8px #2980b9; cursor:pointer; active: transform:translateY(4px);">
+            ТЫК!
+        </button>
+    </div>
+
+    <p style="margin-top:40px; opacity:0.6; font-size:12px;">Синхронизация через MainButton активна 🚀</p>
+
 </body>
 </html>
